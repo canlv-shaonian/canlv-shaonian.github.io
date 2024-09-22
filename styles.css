@@ -55,12 +55,31 @@ body {
 }
 
 .chat-history {
-    height: 300px;
-    overflow-y: auto;
-    border: 1px solid #e0e0e0;
-    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
     padding: 10px;
+}
+
+.message {
+    max-width: 70%;
     margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.user-message {
+    align-self: flex-end;
+    background-color: #e6ffe6; /* 浅绿色 */
+}
+
+.ai-message {
+    align-self: flex-start;
+    background-color: white;
+    border: 1px solid #e0e0e0;
+}
+
+.message-content {
+    word-wrap: break-word;
 }
 
 .chat-input {
@@ -88,6 +107,12 @@ body {
 
 .chat-input button:hover {
     background-color: #45a049;
+}
+
+.chat-input input:disabled,
+.chat-input button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 footer {
@@ -133,11 +158,6 @@ footer {
 .chat-message.assistant {
     background-color: #f0f0f0;
     align-self: flex-start;
-}
-
-.chat-history {
-    display: flex;
-    flex-direction: column;
 }
 
 /* 在文件末尾添加以下样式 */
@@ -189,4 +209,32 @@ footer {
         transform: translate(var(--tx), var(--ty)) rotate(360deg);
         opacity: 0;
     }
+}
+
+pre {
+    background-color: #f4f4f4;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    overflow-x: auto;
+}
+
+code {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.katex {
+    font-size: 1.1em;
+}
+
+code {
+    background-color: #f0f0f0;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
 }
