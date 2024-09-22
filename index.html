@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>惨绿少年 AI对话页面</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="petals-container"></div>
+    <div id="candy-container"></div>
+    
+    <header class="sticky-header">
+        <div class="menu-bar">
+            惨绿少年
+        </div>
+    </header>
+
+    <main>
+        <section class="carousel">
+            <!-- 图片轮播区域 -->
+            <div class="carousel-container">
+                <img src="pic/122561216_p0_master1200.jpg" alt="轮播图1">
+                <img src="pic/120418450_p0_master1200.jpg" alt="轮播图2">
+                <img src="pic/115920928_p0_master1200.jpg" alt="轮播图3">
+            </div>
+        </section>
+
+        <section class="ai-chat">
+            <div class="chat-container">
+                <div class="chat-history" id="chatHistory">
+                    <!-- 对话历史将在这里显示 -->
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="userInput" placeholder="在这里输入您的问题...">
+                    <button id="sendButton">发送</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="social-icons">
+            <!-- 社交媒体图标 -->
+            <a href="#" class="social-icon">微博</a>
+            <a href="#" class="social-icon">微信</a>
+            <a href="#" class="social-icon">抖音</a>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
