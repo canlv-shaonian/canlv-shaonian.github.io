@@ -46,36 +46,61 @@ body {
 }
 
 .ai-chat {
-    width: 90%;
-    margin: 20px auto;
+    width: 100%; /* 宽度占满容器 */
+    margin-bottom: 20px; /* 添加底部间距 */
     background-color: white;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     padding: 20px;
 }
 
+.ai-chat-container {
+    display: flex;
+    flex-direction: column; /* 改为纵向排列 */
+    width: 90%;
+    margin: 20px auto;
+}
+
+.left-chat, .right-chat {
+    display: flex;
+    flex-direction: column;
+}
+
 .chat-history {
+    flex-grow: 1;
+    overflow-y: auto;
+    max-height: 300px; /* 减小最大高度 */
+    margin-bottom: 10px;
     display: flex;
     flex-direction: column;
     padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
 }
 
 .message {
-    max-width: 70%;
+    max-width: 80%; /* 增加最大宽度 */
     margin-bottom: 10px;
     padding: 10px;
     border-radius: 10px;
+    word-wrap: break-word;
 }
 
 .user-message {
     align-self: flex-end;
     background-color: #e6ffe6; /* 浅绿色 */
+    margin-left: auto; /* 添加这行，使用户消息靠右 */
 }
 
 .ai-message {
     align-self: flex-start;
-    background-color: white;
-    border: 1px solid #e0e0e0;
+    background-color: #f0f0f0; /* 浅灰色 */
+}
+
+.ai-message img {
+    max-width: 100%;
+    border-radius: 5px;
+    margin-top: 10px;
 }
 
 .message-content {
@@ -84,6 +109,7 @@ body {
 
 .chat-input {
     display: flex;
+    margin-top: 10px;
 }
 
 .chat-input input {
@@ -237,4 +263,132 @@ code {
     padding: 2px 4px;
     border-radius: 4px;
     font-family: 'Courier New', Courier, monospace;
+}
+
+.truth-table {
+    border-collapse: collapse;
+    margin: 15px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    width: 100%;
+}
+
+.truth-table thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: center;
+}
+
+.truth-table th,
+.truth-table td {
+    padding: 12px 15px;
+    text-align: center;
+    border: 1px solid #dddddd;
+}
+
+.truth-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.truth-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.truth-table tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+.math-block {
+    overflow-x: auto;
+    margin: 1em 0;
+    padding: 1em;
+    background-color: #f8f8f8;
+    border-radius: 4px;
+}
+
+h3 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    color: #333;
+}
+
+ul {
+    margin-left: 1em;
+    padding-left: 1em;
+}
+
+li {
+    margin-bottom: 0.5em;
+}
+
+/* 在文件末尾添加以下样式 */
+#modelSelect {
+    margin-bottom: 10px;
+    padding: 5px;
+    width: 100%;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+/* 添加新的样式 */
+.chat-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+    color: #4a4a4a;
+}
+
+/* 添加响应式设计 */
+@media (min-width: 768px) {
+    .ai-chat-container {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .ai-chat {
+        width: 48%; /* 在较大屏幕上并排显示 */
+    }
+}
+
+/* 添加支持的语言信息样式 */
+.supported-languages {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* 删除以下样式 */
+.language-hint {
+    font-size: 0.8em;
+    color: #888;
+    margin-bottom: 5px;
+    font-style: italic;
+}
+
+/* 保留其他样式不变 */
+
+.ai-chat-container {
+    display: flex;
+    flex-direction: column;
+    width: 90%;
+    margin: 20px auto;
+}
+
+.ai-chat {
+    width: 100%;
+    margin-bottom: 20px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    padding: 20px;
+}
+
+.text-chat, .image-chat {
+    display: flex;
+    flex-direction: column;
 }

@@ -1,3 +1,6 @@
+// 导入 InferenceClient
+// import { InferenceClient } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@2.6.1/+esm';
+
 document.addEventListener('DOMContentLoaded', function() {
     const carouselContainer = document.querySelector('.carousel-container');
     const images = carouselContainer.querySelectorAll('img');
@@ -15,14 +18,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const userInput = document.getElementById('userInput');
     const sendButton = document.getElementById('sendButton');
 
-    let isAiResponding = false; // 跟踪AI是否正在响应
+    // 添加支持的语言信息
+    const supportedLanguages = document.createElement('div');
+    supportedLanguages.classList.add('supported-languages');
+    supportedLanguages.innerHTML = '支持的语言：英语、德语、法语、意大利语、葡萄牙语、印地语、西班牙语和泰语';
+    chatHistory.parentNode.insertBefore(supportedLanguages, chatHistory);
 
-    sendButton.addEventListener('click', () => {
-        if (!isAiResponding) {
-            sendMessage();
-        }
-    });
+    let isAiResponding = false;
+    let conversationHistory = [
+        { role: "system", content: "You are a helpful assistant. Please provide your answers in a clear and concise manner. If asked about truth tables or code, include them in your response. Do not use separate 'question' and 'answer' fields in your response. You can communicate in English, German, French, Italian, Portuguese, Hindi, Spanish, and Thai." }
+    ];
 
+    // 使用您的实际API密钥
+    const API_KEY = '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'; // 请替换为您的实际API密钥
+
+    sendButton.addEventListener('click', sendMessage);
     userInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter' && !isAiResponding) {
             sendMessage();
@@ -30,114 +40,54 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     async function sendMessage() {
-        if (isAiResponding) return; // 如果AI正在响应，直接返回
+        if (isAiResponding) return;
 
         const message = userInput.value.trim();
         if (message === '') return;
 
-        // 禁用输入框和发送按钮
         userInput.disabled = true;
         sendButton.disabled = true;
         isAiResponding = true;
 
-        // 显示用户消息
         appendMessage('user', message);
         userInput.value = '';
 
-        // 创建AI回复的占位符
-        const aiMessageContentElement = appendMessage('ai', '');
+        const aiMessageContentElement = appendMessage('ai', '正在思考...');
 
         try {
-            const apiKey = decrypt(encryptedApiKey); // 解密API密钥
-            const apiUrl = 'https://api.deepseek.com/v1/chat/completions';
-
-            const response = await fetch(apiUrl, {
+            conversationHistory.push({ role: "user", content: message });
+            
+            const response = await fetch('https://api-inference.huggingface.co/models/meta-llama/Llama-3.2-1B-Instruct/v1/chat/completions', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
+                    'Authorization': `Bearer ${API_KEY}`,
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    model: "deepseek-chat",
-                    messages: [
-                        { role: "system", content: "You are a helpful assistant. Please answer in JSON format with 'question' and 'answer' fields." },
-                        { role: "user", content: message }
-                    ],
-                    response_format: { type: 'json_object' },
-                    stream: true // 启用流式输出
+                    model: "meta-llama/Llama-3.2-1B-Instruct",
+                    messages: conversationHistory,
+                    max_tokens: 500,
+                    stream: false
                 })
             });
 
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let aiResponse = '';
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                
-                const chunk = decoder.decode(value);
-                const lines = chunk.split('\n').filter(line => line.trim() !== '');
-                
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        const data = line.slice(6);
-                        if (data === '[DONE]') break;
-                        
-                        try {
-                            const parsed = JSON.parse(data);
-                            const content = parsed.choices[0].delta.content;
-                            if (content) {
-                                aiResponse += content;
-                                aiMessageContentElement.textContent = aiResponse;
-                            }
-                        } catch (error) {
-                            console.error('Error parsing JSON:', error);
-                        }
-                    }
-                }
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            // 解析JSON响应并格式化显示
-            try {
-                const jsonResponse = JSON.parse(aiResponse);
-                let formattedAnswer = jsonResponse.answer;
-
-                // 处理代码块
-                formattedAnswer = formattedAnswer.replace(/```(\w+)?\n([\s\S]*?)```/g, function(match, lang, code) {
-                    return `<pre><code class="language-${lang || 'plaintext'}">${escapeHtml(code.trim())}</code></pre>`;
-                });
-
-                // 处理行内代码
-                formattedAnswer = formattedAnswer.replace(/`([^`]+)`/g, '<code>$1</code>');
-
-                // 渲染LaTeX
-                formattedAnswer = formattedAnswer.replace(/\$\$([\s\S]*?)\$\$/g, function(match, formula) {
-                    return katex.renderToString(formula, {displayMode: true, throwOnError: false});
-                });
-                formattedAnswer = formattedAnswer.replace(/\$((?:[^$]|\\\$)+)\$/g, function(match, formula) {
-                    return katex.renderToString(formula, {displayMode: false, throwOnError: false});
-                });
-
-                aiMessageContentElement.innerHTML = `<strong>问题：</strong>${escapeHtml(jsonResponse.question)}<br><strong>回答：</strong>${formattedAnswer}`;
-
-                // 应用代码高亮
-                Prism.highlightAllUnder(aiMessageContentElement);
-
-            } catch (error) {
-                console.error('Error parsing AI response as JSON:', error);
-                aiMessageContentElement.textContent = aiResponse;
-            }
-
+            const data = await response.json();
+            const aiResponse = data.choices[0].message.content;
+            
+            aiMessageContentElement.innerHTML = formatResponse(aiResponse);
+            conversationHistory.push({ role: "assistant", content: aiResponse });
         } catch (error) {
             console.error('Error:', error);
-            aiMessageContentElement.textContent = '抱歉，发生了错误。请稍后再试。';
+            aiMessageContentElement.innerHTML = `抱歉，发生了错误。请稍后再试。<br>错误详情：${error.message}`;
         } finally {
-            // 重新启用输入框和发送按钮
             userInput.disabled = false;
             sendButton.disabled = false;
             isAiResponding = false;
-            userInput.focus(); // 将焦点重新放在输入框上
+            userInput.focus();
         }
     }
 
@@ -158,19 +108,6 @@ document.addEventListener('DOMContentLoaded', function() {
         chatHistory.scrollTop = chatHistory.scrollHeight;
         return messageElement.querySelector('.message-content');
     }
-
-    // 简单的加密函数
-    function encrypt(text) {
-        return btoa(text.split('').reverse().join(''));
-    }
-
-    // 简单的解密函数
-    function decrypt(encodedText) {
-        return atob(encodedText).split('').reverse().join('');
-    }
-
-    // 加密的API密钥
-    const encryptedApiKey = encrypt('sk-773d4c712ad54ee2b576a5540be5dbf1');
 
     // 添加花瓣效果
     const petalsContainer = document.getElementById('petals-container');
@@ -249,5 +186,107 @@ document.addEventListener('DOMContentLoaded', function() {
              .replace(/>/g, "&gt;")
              .replace(/"/g, "&quot;")
              .replace(/'/g, "&#039;");
+    }
+
+    // 修改格式化真值表函数
+    function formatTruthTable(tableString) {
+        if (typeof tableString !== 'string' || !tableString.trim()) {
+            console.error('Invalid tableString:', tableString);
+            return '无法格式化真值表';
+        }
+
+        // 移除所有 "真值表格式不正确" 的文本
+        tableString = tableString.replace(/真值表格式不正确/g, '');
+
+        const lines = tableString.trim().split('\n');
+        if (lines.length < 3) {
+            console.error('Not enough lines in tableString:', tableString);
+            return '真值表格式不正确';
+        }
+
+        let tableHtml = '<table class="truth-table"><thead><tr>';
+        
+        // 添加表头
+        const headers = lines[0].split(/\s+/).filter(h => h.trim());
+        headers.forEach(header => {
+            tableHtml += `<th>${escapeHtml(header)}</th>`;
+        });
+        tableHtml += '</tr></thead><tbody>';
+
+        // 添加表格内容
+        for (let i = 2; i < lines.length; i++) {
+            const cells = lines[i].split(/\s+/).filter(c => c.trim());
+            if (cells.length > 0) {
+                tableHtml += '<tr>';
+                cells.forEach(cell => {
+                    tableHtml += `<td>${cell}</td>`;
+                });
+                tableHtml += '</tr>';
+            }
+        }
+
+        tableHtml += '</tbody></table>';
+        return tableHtml;
+    }
+
+    function formatResponse(response) {
+        if (response == null) {
+            console.error('Response is null or undefined');
+            return '抱歉，收到了空的响应。请稍后再试。';
+        }
+
+        console.log('Formatting response:', response);
+
+        let formattedResponse = String(response); // 确保 response 是字符串
+
+        // 处理真值表
+        formattedResponse = formattedResponse.replace(/真值表[\s\S]*?(?=\n\n|\Z)/g, function(match) {
+            return formatTruthTable(match);
+        });
+
+        // 处理代码块
+        formattedResponse = formattedResponse.replace(/```(\w+)?\n([\s\S]*?)```/g, function(match, lang, code) {
+            return `<pre><code class="language-${lang || 'plaintext'}">${escapeHtml(code.trim())}</code></pre>`;
+        });
+
+        // 处理行内代码
+        formattedResponse = formattedResponse.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+        // 渲染LaTeX
+        formattedResponse = formattedResponse.replace(/\$\$([\s\S]*?)\$\$/g, function(match, formula) {
+            return katex.renderToString(formula, {displayMode: true, throwOnError: false});
+        });
+        formattedResponse = formattedResponse.replace(/\$((?:[^$]|\\\$)+)\$/g, function(match, formula) {
+            return katex.renderToString(formula, {displayMode: false, throwOnError: false});
+        });
+
+        // 处理数学公式
+        formattedResponse = formattedResponse.replace(/\\\[([\s\S]*?)\\\]/g, function(match, formula) {
+            return `<div class="math-block">${katex.renderToString(formula, {displayMode: true, throwOnError: false})}</div>`;
+        });
+
+        // 处理行内数学公式
+        formattedResponse = formattedResponse.replace(/\\\(([\s\S]*?)\\\)/g, function(match, formula) {
+            return katex.renderToString(formula, {displayMode: false, throwOnError: false});
+        });
+
+        // 处理标题
+        formattedResponse = formattedResponse.replace(/###\s+(.*)/g, '<h3>$1</h3>');
+
+        // 处理列表
+        formattedResponse = formattedResponse.replace(/^\d+\.\s+(.*)/gm, '<li>$1</li>');
+        formattedResponse = formattedResponse.replace(/^-\s+(.*)/gm, '<li>$1</li>');
+        formattedResponse = formattedResponse.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
+
+        // 处理粗体
+        formattedResponse = formattedResponse.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+        // 处理斜体
+        formattedResponse = formattedResponse.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+        // 处理可能的多行回答
+        formattedResponse = formattedResponse.split('\n').join('<br>');
+
+        return formattedResponse;
     }
 });
