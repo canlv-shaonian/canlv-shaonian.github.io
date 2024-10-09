@@ -14,8 +14,8 @@ jobs:
         env:
           HF_API_KEY: ${{ secrets.HF_API_KEY }}
         run: |
-          sed -i 's/process\.env\.HF_API_KEY/"'$HF_API_KEY'"/' code/html/script.js
-          sed -i 's/process\.env\.HF_API_KEY/"'$HF_API_KEY'"/' code/html/script1.js
+          sed -i 's/process\.env\.HF_API_KEY/"'$HF_API_KEY'"/' script.js
+          sed -i 's/process\.env\.HF_API_KEY/"'$HF_API_KEY'"/' script1.js
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
