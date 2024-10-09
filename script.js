@@ -30,7 +30,6 @@ document.addEventListener('DOMContentLoaded', function() {
     ];
 
     // 使用您的实际API密钥
-    const API_KEY = 'API'; // 请替换为您的实际API密钥
 
     sendButton.addEventListener('click', sendMessage);
     userInput.addEventListener('keypress', function(e) {
@@ -60,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch('https://api-inference.huggingface.co/models/meta-llama/Llama-3.2-1B-Instruct/v1/chat/completions', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${API_KEY}`,
+                    'Authorization': `Bearer ${process.env.HF_API_KEY}`, // 使用环境变量
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({

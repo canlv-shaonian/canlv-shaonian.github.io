@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', function() {
     let isGenerating = false;
 
     // 使用您的实际API密钥
-    const API_KEY = 'API'; // 请替换为您的实际API密钥
 
     sendButton2.addEventListener('click', () => {
         if (!isGenerating) {
@@ -43,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch('https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-dev', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${API_KEY}`,
+                    'Authorization': `Bearer ${process.env.HF_API_KEY}`, // 使用环境变量
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
