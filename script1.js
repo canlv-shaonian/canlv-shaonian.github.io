@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch('https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-dev', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${process.env.HF_API_KEY}`, // 使用环境变量
+                    'Authorization': `Bearer ${HF}`, // 使用环境变量
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({

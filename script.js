@@ -1,5 +1,4 @@
-// 导入 InferenceClient
-// import { InferenceClient } from 'https://cdn.jsdelivr.net/npm/@huggingface/inference@2.6.1/+esm';
+const HF = atob('aGZfbGZvQ01MTHFFSWhYanZLY0ZrWFNtc1l1SkVQWUxtSkNkYQ==');
 
 document.addEventListener('DOMContentLoaded', function() {
     const carouselContainer = document.querySelector('.carousel-container');
@@ -29,8 +28,6 @@ document.addEventListener('DOMContentLoaded', function() {
         { role: "system", content: "You are a helpful assistant. Please provide your answers in a clear and concise manner. If asked about truth tables or code, include them in your response. Do not use separate 'question' and 'answer' fields in your response. You can communicate in English, German, French, Italian, Portuguese, Hindi, Spanish, and Thai." }
     ];
 
-    // 使用您的实际API密钥
-
     sendButton.addEventListener('click', sendMessage);
     userInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter' && !isAiResponding) {
@@ -59,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch('https://api-inference.huggingface.co/models/meta-llama/Llama-3.2-1B-Instruct/v1/chat/completions', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${process.env.HF_API_KEY}`, // 使用环境变量
+                    'Authorization': `Bearer ${HF}`, 
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
