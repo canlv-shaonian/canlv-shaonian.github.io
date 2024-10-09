@@ -10,13 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Build
+      - name: Inject environment variables
         env:
           HF_API_KEY: ${{ secrets.HF_API_KEY }}
         run: |
-          # 您的构建命令
+          sed -i 's/process\.env\.HF_API_KEY/"'$HF_API_KEY'"/' code/html/script.js
+          sed -i 's/process\.env\.HF_API_KEY/"'$HF_API_KEY'"/' code/html/script1.js
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+          publish_dir: ./code/html
